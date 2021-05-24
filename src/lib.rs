@@ -25,30 +25,41 @@ pub const TOBII_ERROR_OPERATION_FAILED: Status = 13;
 pub const TOBII_ERROR_CONFLICTING_API_INSTANCES: Status = 14;
 pub const TOBII_ERROR_CALIBRATION_BUSY: Status = 15;
 pub const TOBII_ERROR_CALLBACK_IN_PROGRESS: Status = 16;
+pub const TOBII_ERROR_TOO_MANY_SUBSCRIBERS: Status = 17;
+pub const TOBII_ERROR_CONNECTION_FAILED_DRIVER: Status = 18;
+pub const TOBII_ERROR_UNAUTHORIZED: Status = 19;
+pub const TOBII_ERROR_FIRMWARE_UPGRADE_IN_PROGRESS: Status = 20;
+
 
 /// tobii_error_t
 pub type Status = ::std::os::raw::c_uint;
 
 /// tobii_device_t
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct Device {
     _unused: [u8; 0],
 }
 
 /// tobii_device_info_t
 #[repr(C)]
-#[derive(Copy, Clone )]
+#[derive(Copy, Clone)]
 pub struct DeviceInfo {
-    pub serial_number: [::std::os::raw::c_char; 128usize],
-    pub model: [::std::os::raw::c_char; 64usize],
-    pub generation: [::std::os::raw::c_char; 64usize],
-    pub firmware_version: [::std::os::raw::c_char; 128usize],
+    pub serial_number: [::std::os::raw::c_char; 256usize],
+    pub model: [::std::os::raw::c_char; 256usize],
+    pub generation: [::std::os::raw::c_char; 256usize],
+    pub firmware_version: [::std::os::raw::c_char; 256usize],
+    pub integration_id: [::std::os::raw::c_char; 128usize],
+    pub hw_calibration_version: [::std::os::raw::c_char; 128usize],
+    pub hw_calibration_date: [::std::os::raw::c_char; 128usize],
+    pub lot_id: [::std::os::raw::c_char; 128usize],
+    pub integration_type: [::std::os::raw::c_char; 256usize],
+    pub runtime_build_version: [::std::os::raw::c_char; 256usize],
 }
 
 /// tobii_version_t
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct Version {
     pub major: ::std::os::raw::c_int,
     pub minor: ::std::os::raw::c_int,
@@ -61,29 +72,31 @@ pub const TOBII_LOG_LEVEL_WARN: LogLevel = 1;
 pub const TOBII_LOG_LEVEL_INFO: LogLevel = 2;
 pub const TOBII_LOG_LEVEL_DEBUG: LogLevel = 3;
 pub const TOBII_LOG_LEVEL_TRACE: LogLevel = 4;
+
 pub type LogLevel = ::std::os::raw::c_uint;
 pub type LogFn =
-    ::std::option::Option<unsafe extern "C" fn(log_context: *mut ::std::os::raw::c_void,
-                                               level: LogLevel,
-                                               text: *const ::std::os::raw::c_char)>;
+::std::option::Option<unsafe extern "C" fn(log_context: *mut ::std::os::raw::c_void,
+                                           level: LogLevel,
+                                           text: *const ::std::os::raw::c_char)>;
 
 /// tobii_custom_log_t
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct CustomLog {
     pub log_context: *mut ::std::os::raw::c_void,
     pub log_func: LogFn,
 }
+
 pub type MallocFn =
-    ::std::option::Option<unsafe extern "C" fn(mem_context: *mut ::std::os::raw::c_void,
-                                               size: usize)
-                                               -> *mut ::std::os::raw::c_void>;
+::std::option::Option<unsafe extern "C" fn(mem_context: *mut ::std::os::raw::c_void,
+                                           size: usize)
+                                           -> *mut ::std::os::raw::c_void>;
 pub type FreeFn =
-    ::std::option::Option<unsafe extern "C" fn(mem_context: *mut ::std::os::raw::c_void,
-                                               ptr: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(mem_context: *mut ::std::os::raw::c_void,
+                                           ptr: *mut ::std::os::raw::c_void)>;
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct CustomAlloc {
     pub mem_context: *mut ::std::os::raw::c_void,
     pub malloc_func: MallocFn,
@@ -92,16 +105,17 @@ pub struct CustomAlloc {
 
 /// tobii_api_t
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct Api {
     _unused: [u8; 0],
 }
+
 pub type DeviceUrlReceiver =
-    ::std::option::Option<unsafe extern "C" fn(url: *const ::std::os::raw::c_char,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(url: *const ::std::os::raw::c_char,
+                                           user_data: *mut ::std::os::raw::c_void)>;
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct TrackBox {
     pub front_upper_right_xyz: [f32; 3],
     pub front_upper_left_xyz: [f32; 3],
@@ -117,20 +131,43 @@ pub const TOBII_STATE_POWER_SAVE_ACTIVE: State = 0;
 pub const TOBII_STATE_REMOTE_WAKE_ACTIVE: State = 1;
 pub const TOBII_STATE_DEVICE_PAUSED: State = 2;
 pub const TOBII_STATE_EXCLUSIVE_MODE: State = 3;
+pub const TOBII_STATE_FAULT: State = 4;
+pub const TOBII_STATE_WARNING: State = 5;
+pub const TOBII_STATE_CALIBRATION_ID: State = 6;
+pub const TOBII_STATE_CALIBRATION_ACTIVE: State = 7;
+
 pub type State = ::std::os::raw::c_uint;
 
 pub const TOBII_STATE_BOOL_FALSE: StateBool = 0;
 pub const TOBII_STATE_BOOL_TRUE: StateBool = 1;
+
 pub type StateBool = ::std::os::raw::c_uint;
 
 pub const TOBII_NOT_SUPPORTED: Supported = 0;
 pub const TOBII_SUPPORTED: Supported = 1;
+
 pub type Supported = ::std::os::raw::c_uint;
 
 pub const TOBII_CAPABILITY_DISPLAY_AREA_WRITABLE: Capability = 0;
 pub const TOBII_CAPABILITY_CALIBRATION_2D: Capability = 1;
 pub const TOBII_CAPABILITY_CALIBRATION_3D: Capability = 2;
 pub const TOBII_CAPABILITY_PERSISTENT_STORAGE: Capability = 3;
+pub const TOBII_CAPABILITY_CALIBRATION_PER_EYE: Capability = 4;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_3D_GAZE_COMBINED: Capability = 5;
+pub const TOBII_CAPABILITY_FACE_TYPE: Capability = 6;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_USER_POSITION_GUIDE_XY: Capability = 7;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_USER_POSITION_GUIDE_Z: Capability = 8;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_LIMITED_IMAGE: Capability = 9;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_PUPIL_DIAMETER: Capability = 10;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_PUPIL_POSITION: Capability = 11;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_EYE_OPENNESS: Capability = 12;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_3D_GAZE_PER_EYE: Capability = 13;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_USER_POSITION_GUIDE_XY: Capability = 14;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_TRACKING_IMPROVEMENTS: Capability = 15;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_CONVERGENCE_DISTANCE: Capability = 16;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_IMPROVE_USER_POSITION_HMD: Capability = 17;
+pub const TOBII_CAPABILITY_COMPOUND_STREAM_WEARABLE_INCREASE_EYE_RELIEF: Capability = 18;
+
 pub type Capability = ::std::os::raw::c_uint;
 
 pub const TOBII_STREAM_GAZE_POINT: Stream = 0;
@@ -142,19 +179,25 @@ pub const TOBII_STREAM_WEARABLE: Stream = 5;
 pub const TOBII_STREAM_GAZE_DATA: Stream = 6;
 pub const TOBII_STREAM_DIGITAL_SYNCPORT: Stream = 7;
 pub const TOBII_STREAM_DIAGNOSTICS_IMAGE: Stream = 8;
+pub const TOBII_STREAM_USER_POSITION_GUIDE: Stream = 9;
+pub const TOBII_STREAM_WEARABLE_CONSUMER: Stream = 10;
+pub const TOBII_STREAM_WEARABLE_ADVANCED: Stream = 11;
+pub const TOBII_STREAM_WEARABLE_FOVEATED_GAZE: Stream = 12;
+
 pub type Stream = ::std::os::raw::c_uint;
 
 pub type DataReceiver =
-    ::std::option::Option<unsafe extern "C" fn(data: *const ::std::os::raw::c_void,
-                                               size: usize,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(data: *const ::std::os::raw::c_void,
+                                           size: usize,
+                                           user_data: *mut ::std::os::raw::c_void)>;
 
 pub const TOBII_VALIDITY_INVALID: Validity = 0;
 pub const TOBII_VALIDITY_VALID: Validity = 1;
+
 pub type Validity = ::std::os::raw::c_uint;
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone )]
+#[derive(Debug, Copy, Clone)]
 pub struct DisplayArea {
     pub top_left_mm_xyz: [f32; 3],
     pub top_right_mm_xyz: [f32; 3],
@@ -163,19 +206,33 @@ pub struct DisplayArea {
 
 // tobii_stream.h =========================
 
-pub const TOBII_NOTIFICATION_TYPE_CALIBRATION_STATE_CHANGED : NotificationType = 0 ;
-pub const TOBII_NOTIFICATION_TYPE_EXCLUSIVE_MODE_STATE_CHANGED : NotificationType = 1 ;
-pub const TOBII_NOTIFICATION_TYPE_TRACK_BOX_CHANGED : NotificationType = 2 ;
-pub const TOBII_NOTIFICATION_TYPE_DISPLAY_AREA_CHANGED : NotificationType = 3 ;
-pub const TOBII_NOTIFICATION_TYPE_FRAMERATE_CHANGED : NotificationType = 4 ;
-pub const TOBII_NOTIFICATION_TYPE_POWER_SAVE_STATE_CHANGED : NotificationType = 5 ;
-pub const TOBII_NOTIFICATION_TYPE_DEVICE_PAUSED_STATE_CHANGED : NotificationType = 6 ;
+pub const TOBII_NOTIFICATION_TYPE_CALIBRATION_STATE_CHANGED: NotificationType = 0;
+pub const TOBII_NOTIFICATION_TYPE_EXCLUSIVE_MODE_STATE_CHANGED: NotificationType = 1;
+pub const TOBII_NOTIFICATION_TYPE_TRACK_BOX_CHANGED: NotificationType = 2;
+pub const TOBII_NOTIFICATION_TYPE_DISPLAY_AREA_CHANGED: NotificationType = 3;
+pub const TOBII_NOTIFICATION_TYPE_FRAMERATE_CHANGED: NotificationType = 4;
+pub const TOBII_NOTIFICATION_TYPE_POWER_SAVE_STATE_CHANGED: NotificationType = 5;
+pub const TOBII_NOTIFICATION_TYPE_DEVICE_PAUSED_STATE_CHANGED: NotificationType = 6;
+pub const TOBII_NOTIFICATION_TYPE_CALIBRATION_ENABLED_EYE_CHANGED: NotificationType = 7;
+pub const TOBII_NOTIFICATION_TYPE_CALIBRATION_ID_CHANGED: NotificationType = 8;
+pub const TOBII_NOTIFICATION_TYPE_COMBINED_GAZE_EYE_SELECTION_CHANGED: NotificationType = 9;
+pub const TOBII_NOTIFICATION_TYPE_FAULTS_CHANGED: NotificationType = 10;
+pub const TOBII_NOTIFICATION_TYPE_WARNINGS_CHANGED: NotificationType = 11;
+pub const TOBII_NOTIFICATION_TYPE_FACE_TYPE_CHANGED: NotificationType = 12;
 pub type NotificationType = ::std::os::raw::c_uint;
-pub const TOBII_NOTIFICATION_VALUE_TYPE_NONE : NotificationValueType = 0 ;
-pub const TOBII_NOTIFICATION_VALUE_TYPE_FLOAT : NotificationValueType = 1 ;
-pub const TOBII_NOTIFICATION_VALUE_TYPE_STATE : NotificationValueType = 2 ;
-pub const TOBII_NOTIFICATION_VALUE_TYPE_DISPLAY_AREA : NotificationValueType = 3 ;
+
+pub const TOBII_NOTIFICATION_VALUE_TYPE_NONE: NotificationValueType = 0;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_FLOAT: NotificationValueType = 1;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_STATE: NotificationValueType = 2;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_DISPLAY_AREA: NotificationValueType = 3;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_UINT: NotificationValueType = 4;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_ENABLED_EYE: NotificationValueType = 5;
+pub const TOBII_NOTIFICATION_VALUE_TYPE_STRING: NotificationValueType = 6;
 pub type NotificationValueType = ::std::os::raw::c_uint;
+
+pub const TOBII_FIELD_OF_USE_INTERACTIVE: FieldOfUse = 1;
+pub const TOBII_FIELD_OF_USE_ANALYTICAL: FieldOfUse = 2;
+pub type FieldOfUse = ::std::os::raw::c_uint;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -194,8 +251,8 @@ pub struct Notification {
 }
 
 pub type NotificationsCallbackFn =
-    ::std::option::Option<unsafe extern "C" fn(notification: *const Notification,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(notification: *const Notification,
+                                           user_data: *mut ::std::os::raw::c_void)>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -204,9 +261,11 @@ pub struct GazePoint {
     pub validity: Validity,
     pub position_xy: [f32; 2usize],
 }
+
 pub type GazePointFn =
-    ::std::option::Option<unsafe extern "C" fn(gaze_point: *const GazePoint,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(gaze_point: *const GazePoint,
+                                           user_data: *mut ::std::os::raw::c_void)>;
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct GazeOrigin {
@@ -227,14 +286,16 @@ pub struct EyePositionNormalized {
     pub right_xyz: [f32; 3usize],
 }
 
-pub const TOBII_USER_PRESENCE_STATUS_UNKNOWN : UserPresenceStatus = 0 ;
-pub const TOBII_USER_PRESENCE_STATUS_AWAY : UserPresenceStatus = 1 ;
-pub const TOBII_USER_PRESENCE_STATUS_PRESENT : UserPresenceStatus = 2 ;
+pub const TOBII_USER_PRESENCE_STATUS_UNKNOWN: UserPresenceStatus = 0;
+pub const TOBII_USER_PRESENCE_STATUS_AWAY: UserPresenceStatus = 1;
+pub const TOBII_USER_PRESENCE_STATUS_PRESENT: UserPresenceStatus = 2;
+
 pub type UserPresenceStatus = ::std::os::raw::c_uint;
 pub type UserPresenceFn =
-    ::std::option::Option<unsafe extern "C" fn(status: UserPresenceStatus,
-                                               timestamp_us: i64,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(status: UserPresenceStatus,
+                                           timestamp_us: i64,
+                                           user_data: *mut ::std::os::raw::c_void)>;
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct HeadPose {
@@ -244,17 +305,30 @@ pub struct HeadPose {
     pub rotation_validity_xyz: [Validity; 3usize],
     pub rotation_xyz: [f32; 3usize],
 }
+
 pub type HeadPoseFn =
-    ::std::option::Option<unsafe extern "C" fn(head_pose: *const HeadPose,
-                                               user_data: *mut ::std::os::raw::c_void)>;
+::std::option::Option<unsafe extern "C" fn(head_pose: *const HeadPose,
+                                           user_data: *mut ::std::os::raw::c_void)>;
 pub type GazeOriginFn =
-    ::std::option::Option<unsafe extern "C" fn(gaze_origin: *const GazeOrigin,
-                                               user_data: *mut ::std::os::raw::c_void)>;
-pub type EyePositionNormalizedFn = :: std :: option :: Option < unsafe extern "C" fn ( eye_position : * const EyePositionNormalized , user_data : * mut :: std :: os :: raw :: c_void ) > ;
+::std::option::Option<unsafe extern "C" fn(gaze_origin: *const GazeOrigin,
+                                           user_data: *mut ::std::os::raw::c_void)>;
+pub type EyePositionNormalizedFn = ::std::option::Option<unsafe extern "C" fn(eye_position: *const EyePositionNormalized, user_data: *mut ::std::os::raw::c_void)>;
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct UserPositionGuide
+{
+    pub timestamp_us: i64,
+    pub left_position_validity: Validity,
+    pub left_position_normalized_xyz: [f32; 3usize],
+    pub right_position_validity: Validity,
+    pub right_position_normalized_xyz: [f32; 3usize],
+}
+
+pub type UserPositionGuideFn = ::std::option::Option<unsafe extern "C" fn(user_position_guide: *const UserPositionGuide, user_data: *mut ::std::os::raw::c_void)>;
 
 
-
-#[link(name = "StreamEngineClientKit", kind = "framework")]
+#[link(name = "tobii_stream_engine", kind = "dylib")]
 extern "C" {
     pub fn tobii_error_message(error: Status) -> *const ::std::os::raw::c_char;
     pub fn tobii_get_api_version(version: *mut Version) -> Status;
@@ -275,12 +349,11 @@ extern "C" {
                                                 -> Status;
     pub fn tobii_device_create(api: *mut Api,
                                url: *const ::std::os::raw::c_char,
+                               field_of_use: FieldOfUse,
                                device: *mut *mut Device)
                                -> Status;
     pub fn tobii_device_destroy(device: *mut Device) -> Status;
-    // TODO add support for engine type
-    pub fn tobii_wait_for_callbacks(engine: *mut ::std::os::raw::c_void,
-                                    device_count: ::std::os::raw::c_int,
+    pub fn tobii_wait_for_callbacks(device_count: ::std::os::raw::c_int,
                                     devices: *const *mut Device)
                                     -> Status;
     pub fn tobii_device_process_callbacks(device: *mut Device) -> Status;
@@ -320,9 +393,9 @@ extern "C" {
                                        -> Status;
     pub fn tobii_gaze_origin_unsubscribe(device: *mut Device) -> Status;
     pub fn tobii_eye_position_normalized_subscribe(device: *mut Device,
-                                       callback: EyePositionNormalizedFn,
-                                       user_data: *mut ::std::os::raw::c_void)
-                                       -> Status;
+                                                   callback: EyePositionNormalizedFn,
+                                                   user_data: *mut ::std::os::raw::c_void)
+                                                   -> Status;
     pub fn tobii_eye_position_normalized_unsubscribe(device: *mut Device) -> Status;
     pub fn tobii_user_presence_subscribe(device: *mut Device,
                                          callback: UserPresenceFn,
@@ -339,4 +412,8 @@ extern "C" {
                                          user_data: *mut ::std::os::raw::c_void)
                                          -> Status;
     pub fn tobii_notifications_unsubscribe(device: *mut Device) -> Status;
+    pub fn tobii_user_position_guide_subscribe(device: *mut Device,
+                                               callback: UserPositionGuideFn,
+                                               user_data: *mut ::std::os::raw::c_void) -> Status;
+    pub fn tobii_user_position_guide_unsubscribe(device: *mut Device) -> Status;
 }
